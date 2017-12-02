@@ -17,7 +17,7 @@ divisible_checksum <- function(spreadsheet) {
     quotient <- function(row) {
         for(x in row) {
             y <- row[!(row %% x) & row != x]
-            if (length(y)) return(max(x, y) / min(x, y))
+            if (length(y)) return(y/x)
         }
     }
     return(sum(by(spreadsheet, 1:nrow(spreadsheet), quotient)))
