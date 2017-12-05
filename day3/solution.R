@@ -16,6 +16,38 @@ is_inside <- function(centre, x, y, m) {
     return(abs(x - centre) <= allowed & abs(y - centre) <= allowed)
 }
 
+get_next_move <- function(plane, x, y, m, dir, centre) {
+    # While (x, y) is inside, go in this direction
+    if (dir == "R") {
+        y <- y + 1
+        if (!is_inside(centre, x, y, m)) {
+            dir <- "U"
+            m <- m + 2
+        }
+    }
+    else if (dir == "U") {
+        x <- x - 1
+        if (!is_inside(centre, x - 1, y,  m)) {
+            dir <- "L"
+        }
+    }
+    else if (dir == "L") {
+        y <- y - 1
+        if (!is_inside(centre, x, y - 1, m)) {
+            dir <- "D"
+        }
+    }
+    else if (dir == "D") {
+        x <- x + 1
+        if (!is_inside(centre, x + 1, y, m)) {
+            dir <- "R"
+        }
+    }
+    
+    return(list(x, y, m, dir))
+}
+
+
 # Create a spiral plane up to a given number field
 create_plane <- function(field) {
     n <- min_n(field)
@@ -29,42 +61,23 @@ create_plane <- function(field) {
 
     for(i in 1:n^2) {
         plane[x, y] <- i
-        # While (x, y) is inside, go in this direction
-        if (dir == "R") {
-            y <- y + 1
-            if (!is_inside(centre, x, y, m)) {
-                dir <- "U"
-                m <- m + 2
-            }
-        }
-        else if (dir == "U") {
-            x <- x - 1
-            if (!is_inside(centre, x - 1, y,  m)) {
-                dir <- "L"
-            }
-        }
-        else if (dir == "L") {
-            y <- y - 1
-            if (!is_inside(centre, x, y - 1, m)) {
-                dir <- "D"
-            }
-        }
-        else if (dir == "D") {
-            x <- x + 1
-            if (!is_inside(centre, x + 1, y, m)) {
-                dir <- "R"
-            }
-        }
+        next_move <- get_next_move(plane, x, y, m, dir, centre)
+        x <- next_move[[1]]
+        y <- next_move[[2]]
+        m <- next_move[[3]]
+        dir <- next_move[[4]]
     }
 
     return(plane)
 }
 
 
+
 # Calculate the Manhattan distance between two points
 manhattan_distance <- function(p, q) {
     return(abs(p[1] - q[1]) + abs(p[2] - q[2]))
 }
+
 
 # How many steps are required to carry the data from the square identified 
 # in a puzzle input all the way to the access port?
@@ -82,6 +95,7 @@ for(test_input in test_inputs) {
 }
 
 how_many_steps(puzzle_input)
+
 
 
 # --- Part Two ---
@@ -105,7 +119,8 @@ adj_sum <- function(plane, x, y) {
     return(res)
 }
 
-find_first_greater <- function(field) {
+
+first_greater <- function(field) {
     n <- min_n(field)
     # Generate n x n matrix to be filled with numbers
     plane <- matrix(numeric(n^2), n, n, byrow = TRUE)
@@ -121,35 +136,14 @@ find_first_greater <- function(field) {
         if (plane[x, y] > field){
                 return(plane[x, y])
         }
-        # While (x, y) is inside, go in this direction
-        if (dir == "R") {
-            y <- y + 1
-            if (!is_inside(centre, x, y, m)) {
-                dir <- "U"
-                m <- m + 2
-            }
-        }
-        else if (dir == "U") {
-            x <- x - 1
-            if (!is_inside(centre, x - 1, y,  m)) {
-                dir <- "L"
-            }
-        }
-        else if (dir == "L") {
-            y <- y - 1
-            if (!is_inside(centre, x, y - 1, m)) {
-                dir <- "D"
-            }
-        }
-        else if (dir == "D") {
-            x <- x + 1
-            if (!is_inside(centre, x + 1, y, m)) {
-                dir <- "R"
-            }
-        }
+        next_move <- get_next_move(plane, x, y, m, dir, centre)
+        x <- next_move[[1]]
+        y <- next_move[[2]]
+        m <- next_move[[3]]
+        dir <- next_move[[4]]
     }
     
     return(plane)
 }
 
-find_first_greater(puzzle_input)
+first_greater(puzzle_input)
