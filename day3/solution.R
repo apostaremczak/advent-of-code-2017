@@ -105,7 +105,7 @@ adj_sum <- function(plane, x, y) {
     return(res)
 }
 
-create_sum_plane <- function(field) {
+find_first_greater <- function(field) {
     n <- min_n(field)
     # Generate n x n matrix to be filled with numbers
     plane <- matrix(numeric(n^2), n, n, byrow = TRUE)
@@ -118,7 +118,9 @@ create_sum_plane <- function(field) {
     for(i in 1:n^2) {
         if (x == centre & y == centre) plane[x, y] <- i
         else plane[x, y] <- adj_sum(plane, x, y)
-        
+        if (plane[x, y] > field){
+                return(plane[x, y])
+        }
         # While (x, y) is inside, go in this direction
         if (dir == "R") {
             y <- y + 1
@@ -150,13 +152,4 @@ create_sum_plane <- function(field) {
     return(plane)
 }
 
-
-how_many_sum_steps <- function(field) {
-    plane <- create_sum_plane(field)
-    start_coord <- which(plane == 1, TRUE)
-    point_coord <- which(plane == field, TRUE)
-    
-    return(manhattan_distance(start_coord, point_coord))
-}
-
-how_many_sum_steps(puzzle_input)
+find_first_greater(puzzle_input)
