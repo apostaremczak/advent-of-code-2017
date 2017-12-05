@@ -3,72 +3,57 @@
 test_inputs <- c(1, 12, 23, 1024)
 puzzle_input <- 347991
 
+# Determine minimal n so that the x field is contained in a n x n spiral matrix
+min_n <- function(x) {
+    n <- 1
+    while (!x <= n^2) n <- n + 2
+    return(n)
+}
+
+# Is (x, y) inside a m x m square with centre in the middle of the plane?
+is_inside <- function(centre, x, y, m) {
+    allowed <- floor(m/2)
+    return(abs(x - centre) <= allowed & abs(y - centre) <= allowed)
+}
+
 # Create a spiral plane up to a given number field
 create_plane <- function(field) {
-    # Determine minimal n so that the field is contained in a n x n spiral matrix
-    n <- 1
-    while(!(field <= n^2)) n <- n + 2
-
+    n <- min_n(field)
+    # Generate n x n matrix to be filled with numbers
     plane <- matrix(numeric(n^2), n, n, byrow = TRUE)
-    centre <- median(seq_len(n))
-    x <- y <- centre
+    
+    # Start at the centre of the plane
+    x <- y <- centre <- median(seq_len(n))
     dir <- "R"
-    xmx <- ymx <- cnt <- 1
+    m <- 1
+
     for(i in 1:n^2) {
         plane[x, y] <- i
-        if(dir == "R") {
-            if(xmx>0) {
-                x=x+1
-                xmx=xmx-1
+        # While (x, y) is inside, go in this direction
+        if (dir == "R") {
+            y <- y + 1
+            if (!is_inside(centre, x, y, m)) {
+                dir <- "U"
+                m <- m + 2
             }
-            else {
-                dir="U"
-                ymx=cnt
-                y=y-1
-                ymx=ymx-1
-            }
-            next
         }
-        if(dir == "U") {
-            if(ymx>0) {
-                y=y-1
-                ymx=ymx-1
+        else if (dir == "U") {
+            x <- x - 1
+            if (!is_inside(centre, x - 1, y,  m)) {
+                dir <- "L"
             }
-            else {
-                dir="L"
-                cnt=cnt+1
-                xmx=cnt
-                x=x-1
-                xmx=xmx-1
-            }
-            next
         }
-        if(dir == "L") {
-            if(xmx>0) {
-                x=x-1
-                xmx=xmx-1
-            } 
-            else {
-                dir="D"
-                ymx=cnt
-                y=y+1
-                ymx=ymx-1
-                }
-            next
-        } 
-        if(dir == "D") {
-            if(ymx>0) {
-                y=y+1
-                ymx=ymx-1
-            } 
-            else {
-                dir="R"
-                cnt=cnt+1
-                xmx=cnt
-                x=x+1
-                xmx=xmx-1
+        else if (dir == "L") {
+            y <- y - 1
+            if (!is_inside(centre, x, y - 1, m)) {
+                dir <- "D"
             }
-            next
+        }
+        else if (dir == "D") {
+            x <- x + 1
+            if (!is_inside(centre, x + 1, y, m)) {
+                dir <- "R"
+            }
         }
     }
 
@@ -105,14 +90,14 @@ adj_sum <- function(plane, x, y) {
     n <- nrow(plane)
     res <- 0
     if (x > 1) {
-        res <- res + plane[x-1, y]
-        if (y > 1) res <- res + plane[x-1, y-1]
-        if (y < n) res <- res + plane[x-1, y+1]
+        res <- res + plane[x - 1, y]
+        if (y > 1) res <- res + plane[x - 1, y - 1]
+        if (y < n) res <- res + plane[x - 1, y + 1]
     }
     if (x < n) {
-        res <- res + plane[x+1, y]
-        if (y < n) res <- res + plane[x+1, y+1]
-        if (y > 1) res <- res + plane[x+1, y-1]
+        res <- res + plane[x + 1, y]
+        if (y < n) res <- res + plane[x + 1, y + 1]
+        if (y > 1) res <- res + plane[x + 1, y - 1]
     }
     if (y > 1) res <- res + plane[x, y - 1]
     if (y < n) res <- res + plane[x, y + 1]
@@ -121,30 +106,57 @@ adj_sum <- function(plane, x, y) {
 }
 
 create_sum_plane <- function(field) {
-        # Determine minimal n so that the field is contained in a n x n spiral matrix
-        n <- 1
-        while(!(field <= n^2)) n <- n + 2
+    n <- min_n(field)
+    # Generate n x n matrix to be filled with numbers
+    plane <- matrix(numeric(n^2), n, n, byrow = TRUE)
+    
+    # Start at the centre of the plane
+    x <- y <- centre <- median(seq_len(n))
+    dir <- "R"
+    m <- 1
+    
+    for(i in 1:n^2) {
+        if (x == centre & y == centre) plane[x, y] <- i
+        else plane[x, y] <- adj_sum(plane, x, y)
         
-        plane <- matrix(numeric(n^2), n, n, byrow = TRUE)
-        centre <- median(seq_len(n))
-        x <- y <- centre
-        dir <- "R"
-        xmx <- ymx <- cnt <- 1
-        for(i in 1:n^2) {
-            print(x)
-            print(x)
-            print(plane)
-            if (x != centre & y != centre) plane[xmx, ymx] <- adj_sum(plane, xmx, ymx)
-            else plane[x, y] <- i
-            if(dir=="R") {if(xmx>0) {x=x+1;xmx=xmx-1}
-                else {dir="U";ymx=cnt;y=y-1;ymx=ymx-1}; next}; 
-            if(dir=="U") {if(ymx>0) {y=y-1;ymx=ymx-1}
-                else {dir="L";cnt=cnt+1;xmx=cnt;x=x-1;xmx=xmx-1}; next}; 
-            if(dir=="L") {if(xmx>0) {x=x-1;xmx=xmx-1} 
-                else {dir="D";ymx=cnt;y=y+1;ymx=ymx-1}; next}; 
-            if(dir=="D") {if(ymx>0) {y=y+1;ymx=ymx-1} 
-                else {dir="R";cnt=cnt+1;xmx=cnt;x=x+1;xmx=xmx-1}; next}; 
+        # While (x, y) is inside, go in this direction
+        if (dir == "R") {
+            y <- y + 1
+            if (!is_inside(centre, x, y, m)) {
+                dir <- "U"
+                m <- m + 2
+            }
         }
-        
-        return(plane)
+        else if (dir == "U") {
+            x <- x - 1
+            if (!is_inside(centre, x - 1, y,  m)) {
+                dir <- "L"
+            }
+        }
+        else if (dir == "L") {
+            y <- y - 1
+            if (!is_inside(centre, x, y - 1, m)) {
+                dir <- "D"
+            }
+        }
+        else if (dir == "D") {
+            x <- x + 1
+            if (!is_inside(centre, x + 1, y, m)) {
+                dir <- "R"
+            }
+        }
+    }
+    
+    return(plane)
 }
+
+
+how_many_sum_steps <- function(field) {
+    plane <- create_sum_plane(field)
+    start_coord <- which(plane == 1, TRUE)
+    point_coord <- which(plane == field, TRUE)
+    
+    return(manhattan_distance(start_coord, point_coord))
+}
+
+how_many_sum_steps(puzzle_input)
