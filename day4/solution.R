@@ -10,11 +10,11 @@ puzzle_input[which(puzzle_input == "", TRUE)] <- NA
 # Part 1: a valid passphrase must contain no duplicate words.
 row_to_set <- function(row) return(as.set(unlist(row[which(!is.na(row))])))
 
-is_not_duplicate <- function(row) {
+is_original <- function(row) {
     return(length(row_to_set(row)) == sum(!is.na(row)))
 }
 
-count_original <- sum(by(puzzle_input, 1:nrow(puzzle_input), is_not_duplicate))
+count_original <- sum(by(puzzle_input, 1:nrow(puzzle_input), is_original))
 
 
 # --- Part Two ---
