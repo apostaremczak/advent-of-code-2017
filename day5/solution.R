@@ -1,6 +1,6 @@
 # --- Day 5: A Maze of Twisty Trampolines, All Alike ---
 
-puzzle_input <- read.csv("/home/angie/Code/advent-of-code/day5/input.txt", sep = "\n", header = FALSE)
+puzzle_input <- read.csv("input.txt", sep = "\n", header = FALSE)
 
 
 instructions <- puzzle_input[,1]
