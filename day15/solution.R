@@ -13,20 +13,6 @@ next_value <- function(generator) return((generator$value * generator$factor) %%
 to_bit <- function(value) return(rev(as.numeric(intToBits(value))))
 matching <- function(values) return(all(values[[1]][17:32] == values[[2]][17:32]))
 
-check_next_match <- function(generators) {
-    values <- list()
-    for(j in 1:2) {
-        value <- next_value(generators[[j]])
-        values[[j]] <- to_bit(value)
-        generators[[j]]$value <- value
-        print(generators[[j]])
-    }
-    print('==========')
-    print(values)
-    print(matching(values))
-    return(generators)
-}
-
 match_count <- 0
 for (i in 1:40000000) {
     bits <- list()
